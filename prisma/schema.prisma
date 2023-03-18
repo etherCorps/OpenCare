@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  name        String
+  email       String         @unique
+  password    String
+  phone       String
+  profileIcon String
+  active      Boolean        @default(false)
+  userType    UserType       @default(Member)
+  projects    UserProjects[]
+
+  @@index(email, type: Hash)
+  @@index(id, type: Hash)
+}
+
+model AdditionalPermissions {
+  id         String  @id @default(uuid())
+  saCreation Boolean @default(true)
+}
+
+model Projects {
+  id          String         @id @default(cuid())
+  name        String
+  description String
+  logo        String
+  fields      ProjectFields?
+  sprints     Sprints[]
+  users       UserProjects[]
+}
+
+model ProjectFields {
+  id        String   @id @default(cuid())
+  fields    Json
+  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String   @unique
+}
+
+model Sprints {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String   @unique
+}
+
+model UserProjects {
+  id        String     @id @default(cuid())
+  project   Projects   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  userType  MemberType @default(Member)
+
+  @@unique([userId, projectId])
+}
+
+enum UserType {
+  Admin
+  Member
+}
+
+enum MemberType {
+  Admin
+  Member
+  Client
+}
