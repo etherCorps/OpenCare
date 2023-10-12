@@ -30,9 +30,8 @@
 		id: null,
 		user: null
 	};
-
 	const updateMemberRoleInProject = async (memberId: string) => {
-		if (!selectedPermissions.hasOwnProperty(memberId)) {
+		if (!Object.hasOwn( selectedPermissions, memberId )) {
 			return toast.error('Please update user permission then submit');
 		}
 		const responseData = await fetchHelper(

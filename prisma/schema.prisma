@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["clientExtensions"]
@@ -12,17 +9,26 @@ datasource db {
 }
 
 model User {
-  id          String         @id @default(uuid())
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  name        String
-  email       String         @unique
-  password    String
-  phone       String
+  id String @id @default(uuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name     String
+  email    String @unique
+  password String
+  phone    String
+
   profileIcon String
-  active      Boolean        @default(false)
-  userType    UserType       @default(Member)
-  projects    UserProjects[]
+  active      Boolean  @default(false)
+  userType    UserType @default(Member)
+
+  projects UserProjects[]
+
+  assignedToMe Tickets[] @relation("assignedToMe")
+  managedByMe  Tickets[] @relation("managedByMe")
+  createdByMe  Tickets[] @relation("createdByMe")
+  TestedByMe   Tickets[] @relation("TestedByMe")
 
   @@index(email, type: Hash)
   @@index(id, type: Hash)
@@ -34,40 +40,129 @@ model AdditionalPermissions {
 }
 
 model Projects {
-  id          String         @id @default(cuid())
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   name        String
   description String
   logo        String
-  fields      ProjectFields?
-  sprints     Sprints[]
-  users       UserProjects[]
+
+  fields ProjectFields?
+
+  sprints Sprints[]
+
+  users   UserProjects[]
+  Tickets Tickets[]
 }
 
 model ProjectFields {
   id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   fields    Json
   project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String   @unique
 }
 
 model Sprints {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   name      String
   startDate DateTime
   endDate   DateTime
-  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String   @unique
+
+  project   Projects  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String    @unique
+  Tickets   Tickets[]
 }
 
 model UserProjects {
-  id        String     @id @default(cuid())
-  project   Projects   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userType MemberType @default(Member)
+
+  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  userType  MemberType @default(Member)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
   @@unique([userId, projectId])
+}
+
+model Tickets {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String? @default("") @db.Text
+
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id], name: "assignedToMe", onDelete: SetNull)
+  assignedToId String?
+
+  managedBy   User?   @relation(fields: [managedById], references: [id], name: "managedByMe", onDelete: SetNull)
+  managedById String?
+
+  createdBy   User?   @relation(fields: [createdById], references: [id], name: "createdByMe", onDelete: SetNull)
+  createdById String?
+
+  tester   User?   @relation(fields: [testerId], references: [id], name: "TestedByMe", onDelete: SetNull)
+  testerId String?
+
+  type           TicketType     @default(bug)
+  priority       TicketPriority @default(low)
+  bugStatus      TicketStatus   @default(new)
+  workflowStatus String
+
+  project    Projects @relation(fields: [projectsId], references: [id], onDelete: Cascade)
+  projectsId String
+
+  sprint    Sprints @relation(fields: [sprintsId], references: [id], onDelete: NoAction)
+  sprintsId String
+
+  additionalFieldData Json? @default(dbgenerated())
+
+  ticketAttachments TicketAttachments[]
+}
+
+model Workflow {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusName String       @unique
+  status     TicketStatus
+
+  @@unique([statusName, status])
+}
+
+model TicketAttachments {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fileName      String
+  fileExtension String
+
+  objectKey String @unique
+  objectUrl String
+
+  ticket    Tickets @relation(fields: [ticketsId], references: [id])
+  ticketsId String
+
+  @@index([id, ticketsId])
 }
 
 enum UserType {
@@ -79,4 +174,27 @@ enum MemberType {
   Admin
   Member
   Client
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum TicketType {
+  bug
+  observation
+  question
+  suggestion
+  improvement
+  newFeature
+  integration
+}
+
+enum TicketStatus {
+  new
+  inProgress
+  closed
 }

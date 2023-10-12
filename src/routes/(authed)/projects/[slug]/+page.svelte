@@ -5,8 +5,8 @@
 	import { writable } from 'svelte/store';
 	import { userProjects, currentProject } from '$lib/client/stores';
 	import { page } from '$app/stores';
-	import Tickets from './Tickets.svelte';
-	import Documents from './Documents.svelte';
+	import Tickets from './tickets/Tickets.svelte';
+	import Documents from './docs/Documents.svelte';
 	import Members from './members/Members.svelte';
 	import ProjectSettings from './settings/Settings.svelte';
 
@@ -40,7 +40,7 @@
 		</TabGroup>
 		<div class="border-t border-primary-300 rounded-lg px-5 py-3">
 			{#if $projectTab === 'ticket'}
-				<Tickets />
+				<Tickets members={data.projectMembers} adminPermissions={adminPermission}/>
 			{/if}
 			{#if $projectTab === 'docs'}
 				<Documents />

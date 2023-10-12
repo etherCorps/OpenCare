@@ -9,7 +9,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		isAuthenticated: false,
 		user: null
 	};
-	if (!Boolean(session)) {
+	if (!session) {
 		if (event.route.id?.startsWith('/(authed)')) {
 			if (event.url.pathname !== '/logout') {
 				throw redirect(303, `/login?next=${event.url.pathname}`);

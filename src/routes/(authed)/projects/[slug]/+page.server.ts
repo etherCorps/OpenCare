@@ -1,7 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { prisma } from '$lib/server/PrismaClient';
+import {getUserTickets} from "$lib/server/db/tickets";
 
-export const load: PageServerLoad = async ({ params, depends }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
+	console.log( await getUserTickets( locals.userAuth.user?.id as any, 'assignedToId' ) );
 	return {
 		currentProject: currentProject(params),
 		projectMembers: projectMembers(params)

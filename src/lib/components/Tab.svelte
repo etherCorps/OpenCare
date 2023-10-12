@@ -65,7 +65,7 @@
 </script>
 
 <li
-	class="tab ${classesBase} border border-primary-300 px-4 py-2 rounded-full"
+	class="tab ${classesBase} border border-primary-300 px-4 py-2 rounded-full py-2.5 px-4 rounded-lg duration-150 hover:text-primary-500 hover:bg-white active:bg-white/50 font-medium bg-white text-primary-500 shadow-sm"
 	on:click={() => {
 		onClickHandler(value);
 	}}

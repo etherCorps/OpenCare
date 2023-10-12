@@ -64,11 +64,11 @@
 </script>
 
 <!-- prettier-ignore -->
-<nav class="rounded-full border-primary-300" data-testid="tab-group">
+<nav class="py-4 px-4 md:px-8" data-testid="tab-group">
     <ul
             bind:this={elemTabGroup}
             on:keydown={keydown}
-            class="tab-group-list {classesGroup} space-x-5 border-none"
+            class="max-w-screen-xl mx-auto px-2.5 items-center gap-x-3 overflow-x-auto text-sm rounded-lg sm:flex space-y-3 md:space-y-0"
             role="tablist"
             aria-labelledby={labeledby}
             aria-label={label}
